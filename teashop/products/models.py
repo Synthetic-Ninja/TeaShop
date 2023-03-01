@@ -46,3 +46,7 @@ class Products(models.Model):
 
     def __str__(self):
         return f'Продукт: {self.name} | Категория: {self.category.name} | Бренд {self.brand.name}'
+
+    def get_discounted_price(self):
+        price = float(self.price)
+        return price - (price * (self.discount / 100))
