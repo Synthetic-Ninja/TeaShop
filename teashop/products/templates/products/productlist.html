@@ -146,6 +146,7 @@
                     </div>
                     <div class="col-lg-3">
                         <div class="shop-sidebar-wrapper gray-bg-7 shop-sidebar-mrg">
+                            <form method="get">
                             <div class="shop-widget">
                                 <h4 class="shop-sidebar-title">Shop By Categories</h4>
                                 <div class="shop-catigory">
@@ -173,7 +174,7 @@
                                 <div class="sidebar-list-style mt-20">
                                     <ul>
                                         {% for brand in brands %}
-                                            <li><input type="checkbox"><label><a href="#">{{ brand.name }}</a></label>
+                                            <li><input type="checkbox" name="brands" value="{{ brand.id }}"><label><a href="">{{ brand.name }}</a></label>
                                         {% endfor %}
                                     </ul>
                                 </div>
@@ -181,11 +182,13 @@
                             <div class="shop-widget mt-40 shop-sidebar-border pt-35">
                                 <div class="compare-product">
                                     <div class="compare-product-btn">
-                                        <a href="#">Clear all</a>
-                                        <a href="#">Use Filter </a>
+                                        <input type="reset" value="Clear">
+                                        <input type="submit" value="Use filter">
                                     </div>
+
                                 </div>
                             </div>
+                            </form>
                         </div>
                     </div>
                 </div>

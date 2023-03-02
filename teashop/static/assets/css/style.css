@@ -2870,6 +2870,19 @@ h4.shop-sidebar-title {
 .compare-product-btn > a:hover {
     background-color: #519f10;
 }
+
+.compare-product-btn > input {
+    background-color: #242424;
+    border-radius: 3px;
+    color: #fff;
+    display: inline-block;
+    line-height: 1;
+    padding: 5px 15px 8px;
+}
+.compare-product-btn > input:hover {
+    background-color: #519f10;
+}
+
 .compare-product > p {
     color: #242424;
     margin: 20px 0 24px;
