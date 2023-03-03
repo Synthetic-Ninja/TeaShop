@@ -9,6 +9,7 @@ from .models import Products, ProductCategories, Brands
 class ProductsListView(ListView):
     """Class returns productlist template with all available products"""
 
+    paginate_by = 20
     model = Products
     template_name = 'products/productlist.html'
 
@@ -22,15 +23,17 @@ class ProductsListView(ListView):
                 'brands': Brands.objects.filter(),
                 'title': 'Products'}
         )
+        pass
         return context
 
 
 class ProductFilteredListView(ProductsListView):
     """Class returns productlist template with filtered products"""
+
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        if (brands := self.request.GET.getlist('brands')) is not None:
+        if brands := self.request.GET.getlist('brands'):
             queryset = queryset.filter(brand__id__in=brands)
 
         if (price_filter_param := self.request.GET.get('price')) is not None:
