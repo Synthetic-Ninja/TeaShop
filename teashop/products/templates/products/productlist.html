@@ -28,6 +28,7 @@
         <div class="shop-page-area ptb-100">
             <div class="container">
                 <div class="row flex-row-reverse">
+                    {% if object_list %}
                     <div class="col-lg-9">
                         <div class="shop-topbar-wrapper">
                             <div class="shop-topbar-left">
@@ -144,6 +145,17 @@
                             </div>
                         </div>
                     </div>
+                {% else %}
+                        <div class="col-lg-9">
+                            <div class="shop-topbar-wrapper">
+                                <div class="product-not-found">
+                                    <h1>Product Not Found</h1>
+                                </div>
+                            </div>
+                        </div>
+                {% endif %}
+
+                    <!-- sidebar -->
                     <div class="col-lg-3">
                         <div class="shop-sidebar-wrapper gray-bg-7 shop-sidebar-mrg">
                             <form method="get" action="{% url 'products:filtered_product_list' %}">
