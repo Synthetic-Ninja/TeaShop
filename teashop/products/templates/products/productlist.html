@@ -1,6 +1,7 @@
 {% extends 'index/base.html' %}
 
 {% load static %}
+{% load filter_from_tags %}
 
 {% block custom_css %}
     <link rel="stylesheet" href={% static 'assets/css/animate.css'%}>
@@ -36,21 +37,23 @@
                                     <li class="active"><a href="#product-grid" data-view="product-grid"><i class="fa fa-th"></i></a></li>
                                     <li><a href="#product-list" data-view="product-list"><i class="fa fa-list-ul"></i></a></li>
                                 </ul>
-                                <p>Showing 1 - 20 of 30 results  </p>
+                                <p>Showing {{ page_obj.number }} page - {{ object_list.count }} of {{ queryset_count }} results. </p>
                             </div>
                             <div class="product-sorting-wrapper">
                                 <div class="product-shorting shorting-style">
                                     <label>View:</label>
-                                    <select>
-                                        <option value=""> 20</option>
-                                        <option value=""> 23</option>
-                                        <option value=""> 30</option>
+                                    <select form="filter-form" name="ProductPerPage" class="ProductPerPage">
+                                        {% for paginate_count in paginate_by_list %}
+                                            <option value="{{ paginate_count }}"
+                                                    {% if request.GET.ProductPerPage == paginate_count %} selected {% endif %}>
+                                                {{ paginate_count }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                                 <div class="product-show shorting-style">
                                     <label>Sort by:</label>
                                     <select>
-                                        <option value="">Default</option>
+                                        <option value="" >Default</option>
                                         <option value=""> Name</option>
                                         <option value=""> price</option>
                                     </select>
@@ -127,22 +130,42 @@
                                     {% endfor %}
                                 </div>
                             </div>
+                            {% if page_obj.has_other_pages %}
                             <div class="pagination-total-pages">
                                 <div class="pagination-style">
                                     <ul>
-                                        <li><a class="prev-next prev" href="#"><i class="ion-ios-arrow-left"></i> Prev</a></li>
-                                        <li><a class="active" href="#">1</a></li>
-                                        <li><a href="#">2</a></li>
-                                        <li><a href="#">3</a></li>
-                                        <li><a href="#">...</a></li>
-                                        <li><a href="#">10</a></li>
-                                        <li><a class="prev-next next" href="#">Next<i class="ion-ios-arrow-right"></i> </a></li>
+                                        <li><a class="prev-next prev" {% if not page_obj.has_previous %}style="pointer-events: none"
+                                               href="">
+                                               {% else %}
+                                               href="{% if filter_param %}{% url 'products:filtered_product_list' %}?{{ filter_param.urlencode }}&page={{ page_obj.previous_page_number }}
+                                                      {% else %}{% url 'products:product_list' %}?page={{ page_obj.previous_page_number }}
+                                                      {% endif %}">
+                                                {% endif %}
+                                        <i class="ion-ios-arrow-left"></i> Prev</a></li>
+
+                                        {% for page in page_obj.paginator.page_range %}
+                                        <li><a {% if page == page_obj.number %} class="active" {% endif %}
+                                                href="{% if filter_param %}{% url 'products:filtered_product_list' %}?{{ filter_param.urlencode }}&page={{ page }}
+                                                      {% else %}{% url 'products:product_list' %}?page={{ page }}
+                                                      {% endif %}">{{ page }}</a></li>
+                                        {% endfor %}
+
+                                        <li><a class="prev-next next"
+                                               {% if not page_obj.has_next %}
+                                                   style="pointer-events: none"
+                                                   href="">
+                                               {% else %}
+                                               href="{% if filter_param %}{% url 'products:filtered_product_list' %}?{{ filter_param.urlencode }}&page={{ page_obj.next_page_number }}
+                                                      {% else %}{% url 'products:product_list' %}?page={{ page_obj.next_page_number }}
+                                                      {% endif %}">
+
+                                                {% endif %}
+
+                                                Next<i class="ion-ios-arrow-right"></i> </a></li>
                                     </ul>
                                 </div>
-                                <div class="total-pages">
-                                    <p>Showing 1 - 20 of 30 results  </p>
-                                </div>
                             </div>
+                                {% endif %}
                         </div>
                     </div>
                 {% else %}
@@ -158,13 +181,16 @@
                     <!-- sidebar -->
                     <div class="col-lg-3">
                         <div class="shop-sidebar-wrapper gray-bg-7 shop-sidebar-mrg">
-                            <form method="get" action="{% url 'products:filtered_product_list' %}">
+                            <form method="get" action="{% url 'products:filtered_product_list' %}" id="filter-form">
+                            {% if filter_param.category %}
+                                <input type="hidden" value="{{ filter_param.category }}" name="category">
+                            {% endif %}
                             <div class="shop-widget">
                                 <h4 class="shop-sidebar-title">Shop By Categories</h4>
                                 <div class="shop-catigory">
                                     <ul id="faq">
                                         {% for category in product_categories %}
-                                            <li><a href="#">{{ category.name }}</a></li>
+                                            <li><a href="{% url 'products:filtered_product_list' %}?category={{ category.id }}">{{ category.name }}</a></li>
                                         {% endfor %}
                                     </ul>
                                 </div>
@@ -185,19 +211,23 @@
                                 <h4 class="shop-sidebar-title">By Brand</h4>
                                 <div class="sidebar-list-style mt-20">
                                     <ul>
+                                        {% with brands_in_get=filter_param|get_list_from_query_dict:"brands" %}
                                         {% for brand in brands %}
-                                            <li><input type="checkbox" name="brands" value="{{ brand.id }}"><label><a href="">{{ brand.name }}</a></label>
+                                            <li><input type="checkbox"
+                                                       name="brands"
+                                                       {% if brand.id|convert_to_str in brands_in_get %} checked {% endif %}
+                                                       value="{{ brand.id }}"><label><a href="">{{ brand.name }}</a></label>
                                         {% endfor %}
+                                        {% endwith %}
                                     </ul>
                                 </div>
                             </div>
                             <div class="shop-widget mt-40 shop-sidebar-border pt-35">
                                 <div class="compare-product">
                                     <div class="compare-product-btn">
-                                        <input type="reset" value="Clear">
+                                        <input type="button" onclick="window.location.href='{% url 'products:filtered_product_list' %}';" value="Clear filter">
                                         <input type="submit" value="Use filter">
                                     </div>
-
                                 </div>
                             </div>
                             </form>
@@ -214,4 +244,5 @@
 <script src={% static 'assets/js/isotope.pkgd.min.js'%}></script>
 <script src={% static 'assets/js/ajax-mail.js'%}></script>
 <script src={% static 'assets/js/owl.carousel.min.js'%}></script>
+<script src={% static 'assets/js/form_action.js'%}></script>
 {% endblock %}
