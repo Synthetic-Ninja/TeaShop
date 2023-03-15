@@ -26,7 +26,8 @@ class ProductsListView(ListView):
                 'product_categories': ProductCategories.objects.all(),
                 'brands': Brands.objects.filter(),
                 'title': 'Products',
-                'paginate_by_list': self.paginate_by_list}
+                'paginate_by_list': self.paginate_by_list,
+                'filter_param': QueryDict('', mutable=True)}
         )
         return context
 
@@ -56,11 +57,9 @@ class ProductFilteredListView(ProductsListView):
         context = super().get_context_data()
 
         # Убираем дублирующийся параметр 'page'
-        filter_args = QueryDict('', mutable=True)
-        filter_args.update(self.request.GET.copy())
-        if filter_args.get('page'):
-            del filter_args['page']
-        context['filter_param'] = filter_args
+        context['filter_param'].update(self.request.GET.copy())
+        if context['filter_param'].get('page'):
+            del context['filter_param']['page']
         return context
 
     def get(self, request, *args, **kwargs):
