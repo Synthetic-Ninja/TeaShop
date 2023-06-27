@@ -9,10 +9,10 @@ from .validators import FilterValidator
 
 
 class ProductsListView(ListView):
-    """Class returns productlist template with all available products"""
-
-    paginate_by = 1
-    paginate_by_list = ['All', '5', '10', '20', '30', '40']
+    """Класс возвращает страницу с продуктами, у которых параметр available=True"""
+    paginate_by = 20
+    paginate_by_list = ['All', '1', '10', '20', '30', '40']
+    order_by_params = ['default', 'name', 'price']
     model = Products
     template_name = 'products/productlist.html'
 
@@ -27,13 +27,15 @@ class ProductsListView(ListView):
                 'brands': Brands.objects.filter(),
                 'title': 'Products',
                 'paginate_by_list': self.paginate_by_list,
+                'order_by_param': self.order_by_params,
                 'filter_param': QueryDict('', mutable=True)}
         )
         return context
 
 
 class ProductFilteredListView(ProductsListView):
-    """Class returns productlist template with filtered products"""
+    """Класс возвращает ProductsListView с параметрами фильтрации,
+     переданными с параметрами запроса"""
 
     validator = FilterValidator
 
@@ -46,10 +48,17 @@ class ProductFilteredListView(ProductsListView):
         if brands := self.request.GET.getlist('brands'):
             queryset = queryset.filter(brand__id__in=brands)
 
-        if (price_filter_param := self.request.GET.get('price')) is not None:
-            parsed_prices = re.findall(r'\$\d{1,4}', price_filter_param)
-            min_price, max_price = (Decimal(price[1:]) for price in parsed_prices)
+        if price_filter_param := self.request.GET.get('price'):
+            parsed_prices = re.sub(r'[^\d-]', '', price_filter_param).split('-')
+            min_price, max_price = map(Decimal, parsed_prices)
             queryset = queryset.filter(price__gte=min_price, price__lte=max_price)
+
+        if order_param := self.request.GET.get('Order_By'):
+            match order_param:
+                case 'price':
+                    queryset = sorted(queryset, key=lambda x: x.get_discounted_price())
+                case 'name':
+                    queryset = queryset.order_by('name')
 
         return queryset
 
@@ -58,7 +67,7 @@ class ProductFilteredListView(ProductsListView):
 
         # Убираем дублирующийся параметр 'page'
         context['filter_param'].update(self.request.GET.copy())
-        if context['filter_param'].get('page'):
+        if 'page' in context['filter_param']:
             del context['filter_param']['page']
         return context
 
