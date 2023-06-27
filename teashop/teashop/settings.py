@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     # My apps
     'index.apps.IndexConfig',
     'products.apps.ProductsConfig',
+    'users.apps.UsersConfig'
 ]
 
 MIDDLEWARE = [
