@@ -2,6 +2,7 @@ import re
 
 from django.http import QueryDict
 
+
 class FilterValidator:
     """Класс валидатора, проверяет на валидность входящие get параметры для фильтрации"""
 
@@ -11,10 +12,8 @@ class FilterValidator:
     def __check_price(self) -> bool:
         """Функция проверяет, что в параметре цены действительно два числа"""
 
-        parsed_price = re.findall(r'\$\d{1,4}', self.params.get('price'))
-        if parsed_price is not None:
-            return len(parsed_price) == 2
-        return False
+        parsed_price = re.match(r'[$]?\d{1,4} - [$]?\d{1,4}', self.params.get('price'))
+        return parsed_price is not None
 
     def __check_brands(self) -> bool:
         """Функция проверяет, что все объекты списка параметров brands являются числами"""
@@ -22,15 +21,14 @@ class FilterValidator:
         return all([item.isdigit() for item in self.params.getlist('brands')])
 
     def __check_category(self) -> bool:
-        """Функция проверят, что параметр категория действительно число"""
+        """Функция проверяет, что параметр категория действительно число"""
 
         return self.params.get('category').isdigit()
-
 
     def is_valid(self) -> bool:
         """
         Общая функция проверки входящий параметров, проверяет какие ключи находятся в
-        в get параметрах и исходя из этого запускает проверки на валидность этих параметров
+         get параметрах и исходя из этого запускает проверки на валидность этих параметров
         """
         if self.params.get('brands') is not None:
             if not self.__check_brands():
@@ -45,4 +43,3 @@ class FilterValidator:
                 return False
 
         return True
-

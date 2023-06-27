@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 def main():
     """Run administrative tasks."""
     # Add .env variables
-    load_dotenv()
+    print(f'Project run as pid: {os.getpid()}')
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'teashop.settings')
     try:
         from django.core.management import execute_from_command_line

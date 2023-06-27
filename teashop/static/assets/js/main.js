@@ -227,11 +227,13 @@
     var sliderrange = $('#slider-range');
     var amountprice = $('#amount');
     $(function() {
+        var default_values = amountprice.val().replace(/[$]/gi, '').split('-');
+        console.log(default_values);
         sliderrange.slider({
             range: true,
             min: 0,
             max: 1200,
-            values: [0, 1200],
+            values: [default_values[0], default_values[1]],
             slide: function(event, ui) {
                 amountprice.val("$" + ui.values[0] + " - $" + ui.values[1]);
             }
