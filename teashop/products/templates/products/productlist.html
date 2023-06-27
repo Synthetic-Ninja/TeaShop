@@ -52,10 +52,12 @@
                                 </div>
                                 <div class="product-show shorting-style">
                                     <label>Sort by:</label>
-                                    <select>
-                                        <option value="" >Default</option>
-                                        <option value=""> Name</option>
-                                        <option value=""> price</option>
+                                    <select form="filter-form" name="Order_By" class="Order_By">
+                                        {% for order_param  in order_by_param %}
+                                            <option value="{{order_param}}"
+                                                    {% if request.GET.Order_By == order_param %} selected {% endif %}>
+                                                {{order_param.capitalize}}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                             </div>
@@ -202,7 +204,7 @@
                                     <div id="slider-range"></div>
                                     <div class="price_slider_amount">
                                         <div class="label-input">
-                                            <input type="text" id="amount" name="price"  placeholder="Add Your Price" />
+                                            <input type="text" id="amount" name="price"  placeholder="Add Your Price" value="{% if filter_param.price %}{{filter_param.price}}{% else %}0-1200{% endif %}"/>
                                         </div>
                                     </div>
                                 </div>
