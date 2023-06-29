@@ -2,13 +2,13 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-from dotenv import load_dotenv
 
 
 def main():
+    if '-pid' in sys.argv:
+        sys.argv.remove('-pid')
+        print(f'project start as {os.getpid()} pid.')
     """Run administrative tasks."""
-    # Add .env variables
-    print(f'Project run as pid: {os.getpid()}')
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'teashop.settings')
     try:
         from django.core.management import execute_from_command_line
